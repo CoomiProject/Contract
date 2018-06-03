@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.18;
 
 
 library SafeMath {
@@ -55,7 +55,7 @@ contract ERC223Token {
     event Transfer(address indexed from, address indexed to, uint value, bytes indexed data);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-    function ERC223Token(uint256 _totalSupply) public {
+    constructor(uint256 _totalSupply) public {
         totalSupply = _totalSupply;
         balances[msg.sender] = totalSupply;
     }
@@ -147,5 +147,5 @@ contract CoomiToken is BurnableERC223Token {
     string public constant symbol = 'COOMI';
     uint public constant decimals = 18;
 
-    function CoomiToken(uint256 _totalSupply) ERC223Token(_totalSupply) public {}
+    constructor(uint256 _totalSupply) ERC223Token(_totalSupply) public {}
 }
