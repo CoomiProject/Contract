@@ -5,20 +5,30 @@ import "./SafeMath.sol";
 import "./CoomiToken.sol";
 
 
-interface token {
-    function transfer(address receiver, uint amount) external;
+contract Owned {
+    address public owner;
+
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function transferOwnership(address newOwner) public onlyOwner {
+        owner = newOwner;
+    }
 }
 
-contract Crowdsale {
-    using SafeMath for uint;
-    address public beneficiary;
+contract Crowdsale is Owned {
+    bool public isOpen = false;
     uint public fundingGoal;
-    uint public amountRaised;
     uint public price;
-    token public tokenReward;
-    mapping(address => uint256) public balanceOf;
-    bool fundingGoalReached = false;
-    bool crowdsaleClosed = false;
+    CoomiToken public coomiToken;
+    uint public amountRaised;
+    mapping(address => uint256) public donors;
 
     event GoalReached(address recipient, uint totalAmountRaised);
     event FundTransfer(address backer, uint amount, bool isContribution);
@@ -28,15 +38,8 @@ contract Crowdsale {
      *
      * Setup the owner
      */
-    constructor(
-        uint fundingGoalInEthers,
-        uint etherCostOfEachToken,
-        address addressOfTokenUsedAsReward
-    ) public {
-        beneficiary = msg.sender;
-        fundingGoal = fundingGoalInEthers * 1 ether;
-        price = etherCostOfEachToken * 1 ether;
-        tokenReward = token(addressOfTokenUsedAsReward);
+    constructor(CoomiToken _tokenReward) public {
+        tokenReward = _tokenReward;
     }
 
     /**
@@ -45,23 +48,31 @@ contract Crowdsale {
      * The function without name is the default function that is called whenever anyone sends funds to a contract
      */
     function () payable public {
-        require(!crowdsaleClosed);
+        require(isOpen);
         uint amount = msg.value;
-        beneficiary.send(amount)
+        owner.transfer(amount);
         tokenReward.transfer(msg.sender, amount / price);
-        balanceOf[msg.sender] = balanceOf[msg.sender].add(amount);
-        amountRaised = amountRaised.add(amount);
+        donors[msg.sender] += amount;
+        amountRaised += amount;
         emit FundTransfer(msg.sender, amount, true);
     }
 
     function checkGoalReached() public {
         if (amountRaised >= fundingGoal) {
-            fundingGoalReached = true;
-            emit GoalReached(beneficiary, amountRaised);
+            emit GoalReached(owner, amountRaised);
+            isOpen = false;
         }
     }
-
-    function setPrice(uint price) {
-
+    
+    function setFundingGoal(uint _fundingGoal) public onlyOwner {
+        fundingGoal = _fundingGoal * 1 ether;
+    }
+    
+    function setPrice(uint _price) public onlyOwner {
+        price = _price * 1 ether;
+    }
+    
+    function setIsOpen(bool _isOpen) public onlyOwner {
+        isOpen = _isOpen;
     }
 }
