@@ -1,4 +1,4 @@
-# Contract
+# COOMI Token Contract
 
 ## CRYPTO-CURRENCY
 
