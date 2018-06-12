@@ -1,44 +1,7 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 
-library SafeMath {
-    function mul(uint a, uint b) internal pure returns (uint) {
-        uint c = a * b;
-        assert(a == 0 || c / a == b);
-        return c;
-    }
-
-    function div(uint a, uint b) internal pure returns (uint) {
-        // assert(b > 0); // Solidity automatically throws when dividing by 0
-        uint c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-        return c;
-    }
-
-    function sub(uint a, uint b) internal pure returns (uint) {
-        assert(b <= a);
-        return a - b;
-    }
-
-    function add(uint a, uint b) internal pure returns (uint) {
-        uint c = a + b;
-        assert(c >= a);
-        return c;
-    }
-}
-
-
-// interface ERC223 {
-//     function balanceOf(address who) external pure returns (uint256);
-//     function allowance(address owner, address spender) external view returns (uint256);
-//     function transfer(address to, uint256 value) external;
-//     function transfer(address to, uint value, bytes data) external;
-//     function transferFrom(address from, address to, uint256 value) external returns (bool);
-//     function approve(address spender, uint256 value) external returns (bool);
-//     event Transfer(address indexed from, address indexed to, uint256 value);
-//     event Transfer(address indexed from, address indexed to, uint value, bytes indexed data);
-//     event Approval(address indexed owner, address indexed spender, uint256 value);
-// }
+import "./SafeMath.sol";
 
 
 contract ERC223ReceivingContract {
@@ -147,5 +110,5 @@ contract CoomiToken is BurnableERC223Token {
     string public constant symbol = 'COOMI';
     uint public constant decimals = 18;
 
-    constructor(uint256 _totalSupply) ERC223Token(_totalSupply) public {}
+    constructor(uint256 _totalSupply) ERC223Token(_totalSupply * 10 ** decimals) public {}
 }
