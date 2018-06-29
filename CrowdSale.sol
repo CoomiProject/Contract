@@ -22,10 +22,10 @@ contract Owned {
     }
 }
 
-contract Crowdsale is Owned {
-    bool public isOpen = false;
-    uint public fundingGoal;
-    uint public price;
+contract Crowdsale is Owned, ERC223ReceivingContract {
+    bool public isOpen = true;
+    uint public fundingGoal = 1000;
+    uint public price = 1 ether;
     CoomiToken public coomiToken;
     uint public amountRaised;
     mapping(address => uint256) public donors;
@@ -33,13 +33,19 @@ contract Crowdsale is Owned {
     event GoalReached(address recipient, uint totalAmountRaised);
     event FundTransfer(address backer, uint amount, bool isContribution);
 
+    function tokenFallback(address _from, uint _value, bytes _data) public {
+        _from;
+        _value;
+        _data;
+    }
+
     /**
      * Constructor function
      *
      * Setup the owner
      */
-    constructor(CoomiToken _tokenReward) public {
-        tokenReward = _tokenReward;
+    constructor(CoomiToken _coomiToken) public {
+        coomiToken = _coomiToken;
     }
 
     /**
@@ -51,7 +57,7 @@ contract Crowdsale is Owned {
         require(isOpen);
         uint amount = msg.value;
         owner.transfer(amount);
-        tokenReward.transfer(msg.sender, amount / price);
+        coomiToken.transfer(msg.sender, amount / price);
         donors[msg.sender] += amount;
         amountRaised += amount;
         emit FundTransfer(msg.sender, amount, true);

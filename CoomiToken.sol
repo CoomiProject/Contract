@@ -38,7 +38,7 @@ contract ERC223Token {
         return true;
     }
 
-    function transfer(address _to, uint _value) public {
+    function transfer(address _to, uint256 _value) public {
         uint codeLength;
         bytes memory empty;
 
