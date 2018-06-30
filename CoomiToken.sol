@@ -182,5 +182,6 @@ contract CoomiToken is ERC223Token {
 
     constructor(uint256 _totalSupply) public {
         totalSupply = _totalSupply * 10 ** decimals;
+        balances[msg.sender] = totalSupply;
     }
 }
