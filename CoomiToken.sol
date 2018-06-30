@@ -14,7 +14,6 @@ contract ERC223Interface {
   mapping(address => uint256) internal balances;
   mapping (address => mapping (address => uint256)) internal allowed;
 
-  function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
   function transfer(address to, uint256 value, bytes _data) public returns (bool);
@@ -35,13 +34,6 @@ contract ERC223Interface {
  */
  
 contract ERC223ReceivingContract { 
-/**
- * @dev Standard ERC223 function that will handle incoming token transfers.
- *
- * @param _from  Token sender address.
- * @param _value Amount of tokens.
- * @param _data  Transaction metadata.
- */
     function tokenFallback(address _from, uint _value, bytes _data);
 }
 
@@ -51,13 +43,6 @@ contract ERC223ReceivingContract {
  */
 contract ERC223Token is ERC223Interface {
   using SafeMath for uint256;
-
-  /**
-  * @dev Total number of tokens in existence
-  */
-  function totalSupply() public view returns (uint256) {
-    return totalSupply;
-  }
 
   /**
   * @dev Transfer token for a specified address
@@ -123,12 +108,6 @@ function transfer(address _to, uint256 _value, bytes _data) public returns (bool
    * @param _value uint256 the amount of tokens to be transferred
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    uint codeLength;
-    bytes memory empty;
-    assembly {
-        codeLength := extcodesize(_to)
-    }
-
     require(_to != address(0));
     require(_value <= balances[_from]);
     require(_value <= allowed[_from][msg.sender]);
@@ -136,11 +115,6 @@ function transfer(address _to, uint256 _value, bytes _data) public returns (bool
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-
-    if (codeLength > 0) {
-        ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
-        receiver.tokenFallback(_from, _value, empty);
-    }
 
     emit Transfer(_from, _to, _value);
     return true;
@@ -204,7 +178,7 @@ function transfer(address _to, uint256 _value, bytes _data) public returns (bool
   }
 }
 
-contract CoomiToken is ERC223BurnableToken {
+contract CoomiToken is ERC223Token {
     string public constant name = 'Coomi';
     string public constant symbol = 'COOMI';
     uint public constant decimals = 18;
