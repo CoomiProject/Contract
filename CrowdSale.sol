@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 
 import "./SafeMath.sol";
@@ -25,15 +25,15 @@ contract Owned {
 contract Crowdsale is Owned, ERC223ReceivingContract {
     bool public isOpen = true;
     uint256 public fundingGoal = 1000;
-    uint256 public price = 1 ether;
+    uint256 public price = 1;
     CoomiToken public coomiToken;
     uint256 public amountRaised;
     mapping(address => uint256) public donors;
 
-    event GoalReached(address recipient, uint totalAmountRaised);
-    event FundTransfer(address backer, uint amount, bool isContribution);
+    event GoalReached(address recipient, uint256 totalAmountRaised);
+    event FundTransfer(address backer, uint256 amount, bool isContribution);
 
-    function tokenFallback(address _from, uint _value, bytes _data) public {
+    function tokenFallback(address _from, uint256 _value, bytes _data) public {
         _from;
         _value;
         _data;
@@ -71,11 +71,11 @@ contract Crowdsale is Owned, ERC223ReceivingContract {
     }
     
     function setFundingGoal(uint256 _fundingGoal) public onlyOwner {
-        fundingGoal = _fundingGoal * 1 ether;
+        fundingGoal = _fundingGoal;
     }
     
     function setPrice(uint256 _price) public onlyOwner {
-        price = _price * 1 ether;
+        price = _price;
     }
     
     function setIsOpen(bool _isOpen) public onlyOwner {
