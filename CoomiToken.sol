@@ -11,7 +11,7 @@ import "./SafeMath.sol";
 contract ERC223Interface {
   uint256 public totalSupply;
   mapping(address => uint256) internal balances;
-  mapping (address => mapping (address => uint256)) internal allowed;
+  mapping(address => mapping(address => uint256)) internal allowed;
 
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
