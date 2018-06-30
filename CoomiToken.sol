@@ -4,10 +4,6 @@ pragma solidity ^0.4.23;
 import "./SafeMath.sol";
 
 
-contract ERC223ReceivingContract {
-    function tokenFallback(address _from, uint _value, bytes _data) public;
-}
-
 
 contract ERC223Token {
     using SafeMath for uint;
