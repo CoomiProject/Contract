@@ -7,7 +7,6 @@ import "./SafeMath.sol";
 /**
  * @title ERC223
  * @dev Simpler version of ERC223 interface
- * See https://github.com/ethereum/EIPs/issues/179
  */
 contract ERC223Interface {
   uint256 public totalSupply;
@@ -29,22 +28,20 @@ contract ERC223Interface {
   event Burn(address indexed burner, uint256 value);
 }
 
- /**
+/**
  * @title Contract that will work with ERC223 tokens.
  */
- 
 contract ERC223ReceivingContract { 
     function tokenFallback(address _from, uint _value, bytes _data) public;
 }
 
 /**
- * @title Basic token
- * @dev Basic version of StandardToken, with no allowances.
+ * @title ERC223Token impliment
  */
 contract ERC223Token is ERC223Interface {
   using SafeMath for uint256;
 
-  /**
+ /**
   * @dev Transfer token for a specified address
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
