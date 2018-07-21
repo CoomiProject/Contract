@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "./SafeMath.sol";
 
-contract ERC223Interface {
+contract ERC20Interface {
   uint256 public totalSupply;
   mapping(address => uint256) internal balances;
   mapping(address => mapping(address => uint256)) internal allowed;
@@ -20,11 +20,7 @@ contract ERC223Interface {
   event Burn(address indexed burner, uint256 value);
 }
 
-contract ERC223ReceivingContract { 
-    function tokenFallback(address _from, uint256 _value) public;
-}
-
-contract ERC223Token is ERC223Interface {
+contract ERC20Token is ERC20Interface {
   using SafeMath for uint256;
 
   function balanceOf(address _owner) public view returns (uint256) {
@@ -33,17 +29,6 @@ contract ERC223Token is ERC223Interface {
 
   function transfer(address _to, uint256 _value) public returns (bool) {
     require(_to != address(0));
-
-    uint codeLength;
-    bytes memory empty;
-    assembly {
-        codeLength := extcodesize(_to)
-    }
-
-    if (codeLength > 0) {
-        ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
-        receiver.tokenFallback(msg.sender, _value);
-    }
 
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -101,7 +86,19 @@ contract ERC223Token is ERC223Interface {
 contract CoomiToken is ERC223Token {
     string public constant name = 'Coomi';
     string public constant symbol = 'COOMI';
-    uint public constant decimals = 18;
+    uint8 public constant decimals = 18;
+
+    function name() public view returns (string) {
+      return name;
+    }
+
+    function symbol() public view returns (string) {
+      return symbol;
+    }
+
+    function decimals() public view returns (uint8) {
+      return decimals;
+    }
 
     constructor(uint256 _totalSupply) public {
         totalSupply = _totalSupply * 10 ** decimals;
