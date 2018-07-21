@@ -1,60 +1,54 @@
 pragma solidity ^0.4.24;
 
-
-import "./SafeMath.sol";
 import "./CoomiToken.sol";
 
-
 contract Owned {
-    address public owner;
+  address public owner;
 
-    constructor() public {
-        owner = msg.sender;
-    }
+  constructor() public {
+    owner = msg.sender;
+  }
 
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
+  modifier onlyOwner {
+    require(msg.sender == owner);
+    _;
+  }
 
-    function transferOwnership(address newOwner) public onlyOwner {
-        owner = newOwner;
-    }
+  function transferOwnership(address newOwner) public onlyOwner {
+    owner = newOwner;
+  }
 }
 
-contract Crowdsale is Owned, ERC223ReceivingContract {
-    bool public isOpen = true;
-    uint256 public price = 1;
-    CoomiToken public coomiToken;
-    uint256 public amountRaised;
-    mapping(address => uint256) public donors;
+contract Crowdsale is Owned {
+  using SafeMath for uint256;
 
-    event FundTransfer(address backer, uint256 amount, bool isContribution);
+  CoomiToken public coomiToken;
+  uint256 public exchangeRate;
+  bool public isOpen;
+  uint256 public amountRaised;
+  mapping(address => uint256) public donors;
 
-    function tokenFallback(address _from, uint256 _value) public {
-        _from;
-        _value;
-    }
+  constructor(CoomiToken _coomiToken, uint256 _exchangeRate) public {
+    coomiToken = _coomiToken;
+    exchangeRate = _exchangeRate;
+    isOpen = true;
+  }
 
-    constructor(CoomiToken _coomiToken) public {
-        coomiToken = _coomiToken;
-    }
-
-    function () payable public {
-        require(isOpen);
-        uint256 amount = msg.value;
-        owner.transfer(amount);
-        coomiToken.transfer(msg.sender, amount / price);
-        donors[msg.sender] += amount;
-        amountRaised += amount;
-        emit FundTransfer(msg.sender, amount, true);
-    }
-    
-    function setPrice(uint256 _price) public onlyOwner {
-        price = _price;
-    }
-    
-    function setIsOpen(bool _isOpen) public onlyOwner {
-        isOpen = _isOpen;
-    }
+  function () payable public {
+    require(isOpen);
+    uint256 etherAmount = msg.value;
+    uint256 coomiAmount = etherAmount.mul(exchangeRate);
+    owner.transfer(etherAmount);
+    coomiToken.transfer(msg.sender, coomiAmount);
+    donors[msg.sender] = donors[msg.sender].add(etherAmount);
+    amountRaised = amountRaised.add(etherAmount);
+  }
+  
+  function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
+    exchangeRate = _exchangeRate;
+  }
+  
+  function setIsOpen(bool _isOpen) public onlyOwner {
+    isOpen = _isOpen;
+  }
 }
