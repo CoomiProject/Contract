@@ -9,7 +9,6 @@ contract ERC223Interface {
 
   function balanceOf(address who) public view returns (uint256);
   function transfer(address to, uint256 value) public returns (bool);
-  function transfer(address to, uint256 value, bytes _data) public returns (bool);
   function allowance(address owner, address spender) public view returns (uint256);
   function approve(address spender, uint256 value) public returns (bool);
   function transferFrom(address from, address to, uint256 value) public returns (bool);
@@ -17,13 +16,12 @@ contract ERC223Interface {
   function burnFrom(address from, uint256 value) public;
 
   event Transfer(address indexed from, address indexed to, uint256 value);
-  event Transfer(address indexed from, address indexed to, uint value, bytes indexed data);
   event Approval(address indexed owner, address indexed spender, uint256 value);
   event Burn(address indexed burner, uint256 value);
 }
 
 contract ERC223ReceivingContract { 
-    function tokenFallback(address _from, uint256 _value, bytes _data) public;
+    function tokenFallback(address _from, uint256 _value) public;
 }
 
 contract ERC223Token is ERC223Interface {
@@ -44,33 +42,13 @@ contract ERC223Token is ERC223Interface {
 
     if (codeLength > 0) {
         ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
-        receiver.tokenFallback(msg.sender, _value, empty);
+        receiver.tokenFallback(msg.sender, _value);
     }
 
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
 
     emit Transfer(msg.sender, _to, _value);
-    return true;
-  }
-
-function transfer(address _to, uint256 _value, bytes _data) public returns (bool) {
-    require(_to != address(0));
-
-    uint codeLength;
-    assembly {
-        codeLength := extcodesize(_to)
-    }
-
-    if (codeLength > 0) {
-        ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
-        receiver.tokenFallback(msg.sender, _value, _data);
-    }
-
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-
-    emit Transfer(msg.sender, _to, _value, _data);
     return true;
   }
 
