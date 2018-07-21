@@ -1,7 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "./CoomiToken.sol";
-
 library SafeMath {
 
   function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {
@@ -48,6 +46,10 @@ contract Owned {
   function transferOwnership(address newOwner) public onlyOwner {
     owner = newOwner;
   }
+}
+
+contract CoomiToken {
+  function transfer(address to, uint256 value) public returns (bool);
 }
 
 contract Crowdsale is Owned {
