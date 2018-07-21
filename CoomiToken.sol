@@ -32,17 +32,16 @@ library SafeMath {
 }
 
 contract ERC20Interface {
-  uint256 internal totalSupply;
+  uint256 public totalSupply;
   mapping(address => uint256) internal balances;
   mapping(address => mapping(address => uint256)) internal allowed;
 
-  function totalSupply() public view returns (uint256);
   function balanceOf(address owner) public view returns (uint256);
   function allowance(address owner, address spender) public view returns (uint256);
   function approve(address spender, uint256 value) public returns (bool);
   function transfer(address to, uint256 value) public returns (bool);
   function transferFrom(address from, address to, uint256 value) public returns (bool);
-  function burn(uint256 value) public;
+  function burn(uint256 value) public returns (bool);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -51,10 +50,6 @@ contract ERC20Interface {
 
 contract ERC20Token is ERC20Interface {
   using SafeMath for uint256;
-
-  function totalSupply() public view returns (uint256) {
-    return totalSupply;
-  }
 
   function balanceOf(address _owner) public view returns (uint256) {
     return balances[_owner];
@@ -95,24 +90,12 @@ contract ERC20Token is ERC20Interface {
 }
 
 contract CoomiToken is ERC20Token {
-  string internal constant name = 'Coomi';
-  string internal constant symbol = 'COOMI';
-  uint8 internal constant decimals = 18;
-
-  function name() public view returns (string) {
-    return name;
-  }
-
-  function symbol() public view returns (string) {
-    return symbol;
-  }
-
-  function decimals() public view returns (uint8) {
-    return decimals;
-  }
+  string public constant name = 'Coomi';
+  string public constant symbol = 'COOMI';
+  uint8 public constant decimals = 18;
 
   constructor(uint256 _totalSupply) public {
-    totalSupply = _totalSupply * 10 ** decimals;
+    totalSupply = _totalSupply;
     balances[msg.sender] = totalSupply;
   }
 }
