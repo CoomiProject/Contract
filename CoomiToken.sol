@@ -1,13 +1,7 @@
 pragma solidity ^0.4.24;
 
-
 import "./SafeMath.sol";
 
-
-/**
- * @title ERC223
- * @dev Simpler version of ERC223 interface
- */
 contract ERC223Interface {
   uint256 public totalSupply;
   mapping(address => uint256) internal balances;
@@ -17,8 +11,8 @@ contract ERC223Interface {
   function transfer(address to, uint256 value) public returns (bool);
   function transfer(address to, uint256 value, bytes _data) public returns (bool);
   function allowance(address owner, address spender) public view returns (uint256);
-  function transferFrom(address from, address to, uint256 value) public returns (bool);
   function approve(address spender, uint256 value) public returns (bool);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
   function burn(uint256 value) public;
   function burnFrom(address from, uint256 value) public;
 
@@ -28,93 +22,60 @@ contract ERC223Interface {
   event Burn(address indexed burner, uint256 value);
 }
 
-/**
- * @title Contract that will work with ERC223 tokens.
- */
 contract ERC223ReceivingContract { 
-    function tokenFallback(address _from, uint _value, bytes _data) public;
+    function tokenFallback(address _from, uint256 _value, bytes _data) public;
 }
 
-/**
- * @title ERC223Token impliment
- */
 contract ERC223Token is ERC223Interface {
   using SafeMath for uint256;
 
- /**
-  * @dev Transfer token for a specified address
-  * @param _to The address to transfer to.
-  * @param _value The amount to be transferred.
-  */
+  function balanceOf(address _owner) public view returns (uint256) {
+    return balances[_owner];
+  }
+
   function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+
     uint codeLength;
     bytes memory empty;
     assembly {
         codeLength := extcodesize(_to)
     }
 
-    require(_to != address(0));
-    require(_value <= balances[msg.sender]);
-
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-
     if (codeLength > 0) {
         ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
         receiver.tokenFallback(msg.sender, _value, empty);
     }
+
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
 
     emit Transfer(msg.sender, _to, _value);
     return true;
   }
 
 function transfer(address _to, uint256 _value, bytes _data) public returns (bool) {
+    require(_to != address(0));
+
     uint codeLength;
     assembly {
         codeLength := extcodesize(_to)
     }
-
-    require(_to != address(0));
-    require(_value <= balances[msg.sender]);
-
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
 
     if (codeLength > 0) {
         ERC223ReceivingContract receiver = ERC223ReceivingContract(_to);
         receiver.tokenFallback(msg.sender, _value, _data);
     }
 
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+
     emit Transfer(msg.sender, _to, _value, _data);
     return true;
   }
 
-  /**
-  * @dev Gets the balance of the specified address.
-  * @param _owner The address to query the the balance of.
-  * @return An uint256 representing the amount owned by the passed address.
-  */
-  function balanceOf(address _owner) public view returns (uint256) {
-    return balances[_owner];
-  }
-
-    /**
-   * @dev Transfer tokens from one address to another
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
-   */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
-    require(_value <= balances[_from]);
-    require(_value <= allowed[_from][msg.sender]);
-
-    balances[_from] = balances[_from].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-
-    emit Transfer(_from, _to, _value);
-    return true;
+  function allowance(address _owner, address _spender) public view returns (uint256) {
+    return allowed[_owner][_spender];
   }
 
   /**
@@ -132,25 +93,18 @@ function transfer(address _to, uint256 _value, bytes _data) public returns (bool
     return true;
   }
 
-  /**
-   * @dev Function to check the amount of tokens that an owner allowed to a spender.
-   * @param _owner address The address which owns the funds.
-   * @param _spender address The address which will spend the funds.
-   * @return A uint256 specifying the amount of tokens still available for the spender.
-   */
-  function allowance(address _owner, address _spender) public view returns (uint256) {
-    return allowed[_owner][_spender];
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+
+    emit Transfer(_from, _to, _value);
+    return true;
   }
 
-  /**
-   * @dev Burns a specific amount of tokens.
-   * @param _value The amount of token to be burned.
-   */
   function burn(uint256 _value) public {
-    require(_value <= balances[msg.sender]);
-    // no need to require value <= totalSupply, since that would imply the
-    // sender's balance is greater than the totalSupply, which *should* be an assertion failure
-
     balances[msg.sender] = balances[msg.sender].sub(_value);
     totalSupply = totalSupply.sub(_value);
     emit Burn(msg.sender, _value);
@@ -158,16 +112,7 @@ function transfer(address _to, uint256 _value, bytes _data) public returns (bool
   }
 
   function burnFrom(address _from, uint256 _value) public {
-    require(_value <= allowed[_from][msg.sender]);
-    // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
-    // this function needs to emit an event with the updated approval.
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-
-
-    require(_value <= balances[_from]);
-    // no need to require value <= totalSupply, since that would imply the
-    // sender's balance is greater than the totalSupply, which *should* be an assertion failure
-
     balances[_from] = balances[_from].sub(_value);
     totalSupply = totalSupply.sub(_value);
     emit Burn(_from, _value);

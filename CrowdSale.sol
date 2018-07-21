@@ -39,20 +39,10 @@ contract Crowdsale is Owned, ERC223ReceivingContract {
         _data;
     }
 
-    /**
-     * Constructor function
-     *
-     * Setup the owner
-     */
     constructor(CoomiToken _coomiToken) public {
         coomiToken = _coomiToken;
     }
 
-    /**
-     * Fallback function
-     *
-     * The function without name is the default function that is called whenever anyone sends funds to a contract
-     */
     function () payable public {
         require(isOpen);
         uint256 amount = msg.value;
