@@ -37,9 +37,7 @@ contract ERC20Token is ERC20Interface {
 
   function approve(address _spender, uint256 _value) public returns (bool) {
     require((_value == 0) || (allowed[msg.sender][_spender] == 0));
-
     allowed[msg.sender][_spender] = _value;
-    
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
@@ -47,7 +45,6 @@ contract ERC20Token is ERC20Interface {
   function transfer(address _to, uint256 _value) public returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
-
     emit Transfer(msg.sender, _to, _value);
     return true;
   }
@@ -56,7 +53,6 @@ contract ERC20Token is ERC20Interface {
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
-
     emit Transfer(_from, _to, _value);
     return true;
   }
@@ -64,7 +60,6 @@ contract ERC20Token is ERC20Interface {
   function burn(uint256 _value) public returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     totalSupply = totalSupply.sub(_value);
-
     emit Burn(msg.sender, _value);
     return true;
   }
