@@ -64,20 +64,20 @@ contract ERC20Token is ERC20Interface {
   function burn(uint256 _value) public returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     totalSupply = totalSupply.sub(_value);
-    
+
     emit Burn(msg.sender, _value);
     emit Transfer(msg.sender, address(0), _value);
     return true;
   }
 }
 
-contract CoomiToken is ERC223Token {
-    string public constant name = 'Coomi';
-    string public constant symbol = 'COOMI';
-    uint8 public constant decimals = 18;
+contract CoomiToken is ERC20Token {
+  string public constant name = 'Coomi';
+  string public constant symbol = 'COOMI';
+  uint8 public constant decimals = 18;
 
-    constructor(uint256 _totalSupply) public {
-        totalSupply = _totalSupply * 10 ** decimals;
-        balances[msg.sender] = totalSupply;
-    }
+  constructor(uint256 _totalSupply) public {
+    totalSupply = _totalSupply * 10 ** decimals;
+    balances[msg.sender] = totalSupply;
+  }
 }
