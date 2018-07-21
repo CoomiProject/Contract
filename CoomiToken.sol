@@ -83,7 +83,7 @@ contract CoomiToken is ERC20Token {
     return symbol;
   }
 
-    function decimals() public view returns (uint8) {
+  function decimals() public view returns (uint8) {
     return decimals;
   }
 
