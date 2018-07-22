@@ -59,37 +59,43 @@ contract Crowdsale is Owned {
   uint256 public etherAmountsSum;
   uint256 public coomiAmountsSum;
 
-
   constructor(CoomiToken _coomiToken, uint256 _exchangeRate) public {
     coomiToken = _coomiToken;
     exchangeRate = _exchangeRate;
   }
 
   function () payable public {
-    require(exchangeRate >= 1);
+    require(exchangeRate > 0);
     uint256 etherAmount = msg.value;
     uint256 coomiAmount = etherAmount.mul(exchangeRate);
     owner.transfer(etherAmount);
     etherAmounts[msg.sender] = etherAmounts[msg.sender].add(etherAmount);
     coomiAmounts[msg.sender] = coomiAmounts[msg.sender].add(coomiAmount);
-
     etherAmountsSum = etherAmountsSum.add(etherAmount);
     coomiAmountsSum = coomiAmountsSum.add(coomiAmount);
   }
 
-  function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
-    exchangeRate = _exchangeRate;
+  function withdrow() public returns (bool) {
+    require(exchangeRate == 0);
+    require(coomiAmounts[msg.sender] > 0);
+    coomiToken.transfer(msg.sender, coomiAmounts[msg.sender]);
+    coomiAmounts[msg.sender] = 0;
+    return true;
   }
 
-  function withdrow(address _address) public returns (bool) {
+  function withdrowTo(address _address) public onlyOwner returns (bool) {
     require(coomiAmounts[_address] > 0);
     coomiToken.transfer(_address, coomiAmounts[_address]);
-    coomiAmounts[_address] = 0
-    return true
+    coomiAmounts[_address] = 0;
+    return true;
   }
 
-  function withdrowToOnwer(uint256 _value) public onlyOwner returns (bool)  {
+  function withdrowToOwner(uint256 _value) public onlyOwner returns (bool) {
     coomiToken.transfer(owner, _value);
-    return true
+    return true;
+  }
+
+  function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
+    exchangeRate = _exchangeRate;
   }
 }
