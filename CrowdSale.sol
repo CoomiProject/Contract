@@ -11,6 +11,15 @@ library SafeMath {
     return c;
   }
 
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    return a / b;
+  }
+
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
   function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
     c = a + b;
     assert(c >= a);
@@ -19,7 +28,8 @@ library SafeMath {
 }
 
 contract CoomiToken {
-  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function balanceOf(address owner) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
 }
 
 contract Owned {
@@ -44,8 +54,11 @@ contract Crowdsale is Owned {
 
   CoomiToken public coomiToken;
   uint256 public exchangeRate;
-  uint256 public amountRaised;
-  mapping(address => uint256) public donors;
+  mapping(address => uint256) public etherAmounts;
+  mapping(address => uint256) public coomiAmounts;
+  uint256 public etherAmountsSum;
+  uint256 public coomiAmountsSum;
+
 
   constructor(CoomiToken _coomiToken, uint256 _exchangeRate) public {
     coomiToken = _coomiToken;
@@ -57,12 +70,26 @@ contract Crowdsale is Owned {
     uint256 etherAmount = msg.value;
     uint256 coomiAmount = etherAmount.mul(exchangeRate);
     owner.transfer(etherAmount);
-    coomiToken.transferFrom(owner, msg.sender, coomiAmount);
-    donors[msg.sender] = donors[msg.sender].add(etherAmount);
-    amountRaised = amountRaised.add(etherAmount);
+    etherAmounts[msg.sender] = etherAmounts[msg.sender].add(etherAmount);
+    coomiAmounts[msg.sender] = coomiAmounts[msg.sender].add(coomiAmount);
+
+    etherAmountsSum = etherAmountsSum.add(etherAmount);
+    coomiAmountsSum = coomiAmountsSum.add(coomiAmount);
   }
   
   function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
     exchangeRate = _exchangeRate;
+  }
+
+  function withdrow(address _address) public returns (bool) {
+    require(coomiAmounts[_address] > 0);
+    coomiToken.transfer(_address, coomiAmounts[_address]);
+    coomiAmounts[_address] = 0
+    return true
+  }
+
+  function withdrowAll(uint256 _value) public onlyOwner returns (bool)  {
+    coomiToken.transfer(owner, _value);
+    return true
   }
 }
