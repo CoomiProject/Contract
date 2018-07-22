@@ -76,7 +76,7 @@ contract Crowdsale is Owned {
     etherAmountsSum = etherAmountsSum.add(etherAmount);
     coomiAmountsSum = coomiAmountsSum.add(coomiAmount);
   }
-  
+
   function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
     exchangeRate = _exchangeRate;
   }
@@ -88,7 +88,7 @@ contract Crowdsale is Owned {
     return true
   }
 
-  function withdrowAll(uint256 _value) public onlyOwner returns (bool)  {
+  function withdrowToOnwer(uint256 _value) public onlyOwner returns (bool)  {
     coomiToken.transfer(owner, _value);
     return true
   }
