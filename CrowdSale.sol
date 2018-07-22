@@ -81,11 +81,27 @@ contract Crowdsale is Owned {
   }
 
   function withdrow() public {
-    withdrowTo(msg.sender);
+    require(withdrowRate0 > 0);
+    require(withdrowRate1 >= withdrowRate0);
+    address to = msg.sender
+    uint256 withdrowAmount = coomiAmounts[to].mul(withdrowRate0)
+                                             .div(withdrowRate1)
+                                             .sub(withdrowAmounts[to]);
+    require(withdrowAmount > 0);
+    coomiToken.transferFrom(owner, to, withdrowAmount);
+    withdrowAmounts[to] = withdrowAmounts[to].add(withdrowAmount);
   }
 
   function withdrowByOwner(address _to) public onlyOwner {
-    withdrowTo(_to);
+    require(withdrowRate0 > 0);
+    require(withdrowRate1 >= withdrowRate0);
+    address to = _to
+    uint256 withdrowAmount = coomiAmounts[to].mul(withdrowRate0)
+                                             .div(withdrowRate1)
+                                             .sub(withdrowAmounts[to]);
+    require(withdrowAmount > 0);
+    coomiToken.transferFrom(owner, to, withdrowAmount);
+    withdrowAmounts[to] = withdrowAmounts[to].add(withdrowAmount);
   }
 
   function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
@@ -98,14 +114,9 @@ contract Crowdsale is Owned {
     withdrowRate1 = _withdrowRate1;
   }
 
+  
+
   function withdrowTo(address to) internal {
-    require(withdrowRate0 > 0);
-    require(withdrowRate1 >= withdrowRate0);
-    uint256 withdrowAmount = coomiAmounts[to].mul(withdrowRate0)
-                                             .div(withdrowRate1)
-                                             .sub(withdrowAmounts[to]);
-    require(withdrowAmount > 0);
-    coomiToken.transferFrom(owner, to, withdrowAmount);
-    withdrowAmounts[to] = withdrowAmounts[to].add(withdrowAmount);
+
   }
 }
