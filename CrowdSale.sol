@@ -113,10 +113,4 @@ contract Crowdsale is Owned {
     withdrowRate0 = _withdrowRate0;
     withdrowRate1 = _withdrowRate1;
   }
-
-  
-
-  function withdrowTo(address to) internal {
-
-  }
 }
