@@ -53,7 +53,7 @@ contract Crowdsale is Owned {
   }
 
   function () payable public {
-    require(exchangeRate > 1);
+    require(exchangeRate >= 1);
     uint256 etherAmount = msg.value;
     uint256 coomiAmount = etherAmount.mul(exchangeRate);
     owner.transfer(etherAmount);
