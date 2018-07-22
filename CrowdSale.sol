@@ -78,22 +78,20 @@ contract Crowdsale is Owned {
     coomiAmountsSum = coomiAmountsSum.add(coomiAmount);
   }
 
-  function withdrow() public returns (bool) {
+  function withdrow() public {
     require(withdrowRate > 0);
     uint256 withdrowAmount = coomiAmounts[msg.sender].div(withdrowRate).sub(withdrowAmounts[msg.sender]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, msg.sender, withdrowAmount);
     withdrowAmounts[msg.sender] = withdrowAmounts[msg.sender].add(withdrowAmount);
-    return true;
   }
 
-  function withdrowTo(address _to) public onlyOwner returns (bool) {
+  function withdrowTo(address _to) public onlyOwner {
     require(withdrowRate > 0);
     uint256 withdrowAmount = coomiAmounts[_to].div(withdrowRate).sub(withdrowAmounts[_to]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, _to, withdrowAmount);
     withdrowAmounts[_to] = withdrowAmounts[_to].add(withdrowAmount);
-    return true;
   }
 
   function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
