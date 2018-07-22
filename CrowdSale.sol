@@ -49,7 +49,7 @@ contract Owned {
 }
 
 contract CoomiToken {
-  function transfer(address to, uint256 value) public returns (bool);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
 }
 
 contract Crowdsale is Owned {
@@ -72,7 +72,7 @@ contract Crowdsale is Owned {
     uint256 etherAmount = msg.value;
     uint256 coomiAmount = etherAmount.mul(exchangeRate);
     owner.transfer(etherAmount);
-    coomiToken.transfer(msg.sender, coomiAmount);
+    coomiToken.transferFrom(owner, msg.sender, coomiAmount);
     donors[msg.sender] = donors[msg.sender].add(etherAmount);
     amountRaised = amountRaised.add(etherAmount);
   }
