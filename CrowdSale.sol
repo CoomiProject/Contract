@@ -101,6 +101,6 @@ contract Crowdsale is Owned {
   }
 
   function setWithdrowRate(uint256 _withdrowRate) public onlyOwner {
-    exchangeRate = _withdrowRate;
+    withdrowRate = _withdrowRate;
   }
 }
