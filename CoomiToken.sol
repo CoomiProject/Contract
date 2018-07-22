@@ -48,6 +48,7 @@ contract ERC20Token is ERC20Interface {
   }
 
   function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
     emit Transfer(msg.sender, _to, _value);
@@ -55,6 +56,7 @@ contract ERC20Token is ERC20Interface {
   }
 
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);

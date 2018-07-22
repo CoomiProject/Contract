@@ -28,8 +28,7 @@ library SafeMath {
 }
 
 contract CoomiToken {
-  function balanceOf(address owner) public view returns (uint256);
-  function transfer(address to, uint256 value) public returns (bool);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
 }
 
 contract Owned {
@@ -44,8 +43,9 @@ contract Owned {
     _;
   }
 
-  function transferOwnership(address newOwner) public onlyOwner {
-    owner = newOwner;
+  function transferOwnership(address _owner) public onlyOwner {
+    require(_owner != address(0));
+    owner = _owner;
   }
 }
 
@@ -54,21 +54,24 @@ contract Crowdsale is Owned {
 
   CoomiToken public coomiToken;
   uint256 public exchangeRate;
-  mapping(address => uint256) public etherAmounts;
-  mapping(address => uint256) public coomiAmounts;
+  uint256 public withdrowRate;
   uint256 public etherAmountsSum;
   uint256 public coomiAmountsSum;
+  mapping(address => uint256) public etherAmounts;
+  mapping(address => uint256) public coomiAmounts;
+  mapping(address => uint256) public withdrowAmounts;
 
-  constructor(CoomiToken _coomiToken, uint256 _exchangeRate) public {
+  constructor(CoomiToken _coomiToken) public {
     coomiToken = _coomiToken;
-    exchangeRate = _exchangeRate;
+    exchangeRate = 0;
+    withdrowRate = 0;
   }
 
   function () payable public {
     require(exchangeRate > 0);
+    owner.transfer(etherAmount);
     uint256 etherAmount = msg.value;
     uint256 coomiAmount = etherAmount.mul(exchangeRate);
-    owner.transfer(etherAmount);
     etherAmounts[msg.sender] = etherAmounts[msg.sender].add(etherAmount);
     coomiAmounts[msg.sender] = coomiAmounts[msg.sender].add(coomiAmount);
     etherAmountsSum = etherAmountsSum.add(etherAmount);
@@ -76,27 +79,28 @@ contract Crowdsale is Owned {
   }
 
   function withdrow() public returns (bool) {
-    require(exchangeRate == 0);
-    require(coomiAmounts[msg.sender] > 0);
-    coomiToken.transfer(msg.sender, coomiAmounts[msg.sender]);
-    coomiAmounts[msg.sender] = 0;
+    require(withdrowRate > 0);
+    uint256 withdrowAmount = coomiAmounts[msg.sender].div(withdrowRate).sub(withdrowAmounts[msg.sender]);
+    require(withdrowAmount > 0);
+    coomiToken.transferFrom(owner, msg.sender, withdrowAmount);
+    withdrowAmounts[msg.sender] = withdrowAmounts[msg.sender].add(withdrowAmount);
     return true;
   }
 
-  function withdrowTo(address _address) public onlyOwner returns (bool) {
-    require(exchangeRate == 0);
-    require(coomiAmounts[_address] > 0);
-    coomiToken.transfer(_address, coomiAmounts[_address]);
-    coomiAmounts[_address] = 0;
-    return true;
-  }
-
-  function withdrowToOwner(uint256 _value) public onlyOwner returns (bool) {
-    coomiToken.transfer(owner, _value);
+  function withdrowTo(address _to) public onlyOwner returns (bool) {
+    require(withdrowRate > 0);
+    uint256 withdrowAmount = coomiAmounts[_to].div(withdrowRate).sub(withdrowAmounts[_to]);
+    require(withdrowAmount > 0);
+    coomiToken.transferFrom(owner, _to, withdrowAmount);
+    withdrowAmounts[_to] = withdrowAmounts[_to].add(withdrowAmount);
     return true;
   }
 
   function setExchangeRate(uint256 _exchangeRate) public onlyOwner {
     exchangeRate = _exchangeRate;
+  }
+
+  function setWithdrowRate(uint256 _withdrowRate) public onlyOwner {
+    exchangeRate = _withdrowRate;
   }
 }
