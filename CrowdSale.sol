@@ -69,7 +69,7 @@ contract Crowdsale is Owned {
     withdrowRate1 = 0;
   }
 
-  function () payable public {
+  function() payable public {
     require(exchangeRate > 0);
     address from = msg.sender;
     uint256 etherValue = msg.value;
