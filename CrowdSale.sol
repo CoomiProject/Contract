@@ -84,6 +84,7 @@ contract Crowdsale is Owned {
   }
 
   function withdrowTo(address _address) public onlyOwner returns (bool) {
+    require(exchangeRate == 0);
     require(coomiAmounts[_address] > 0);
     coomiToken.transfer(_address, coomiAmounts[_address]);
     coomiAmounts[_address] = 0;
