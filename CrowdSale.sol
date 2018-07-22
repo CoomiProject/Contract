@@ -54,8 +54,8 @@ contract Crowdsale is Owned {
 
   CoomiToken public coomiToken;
   uint256 public exchangeRate;
-  uint256 public withdrowRateMolecular;
-  uint256 public withdrowRateDenominator;
+  uint256 public withdrowRate0; // Molecular;
+  uint256 public withdrowRate1; // Denominator;
   uint256 public etherAmountsSum;
   uint256 public coomiAmountsSum;
   mapping(address => uint256) public etherAmounts;
@@ -65,8 +65,8 @@ contract Crowdsale is Owned {
   constructor(CoomiToken _coomiToken) public {
     coomiToken = _coomiToken;
     exchangeRate = 0;
-    withdrowRateMolecular = 0;
-    withdrowRateDenominator = 0;
+    withdrowRate0 = 0;
+    withdrowRate1 = 0;
   }
 
   function () payable public {
@@ -81,10 +81,10 @@ contract Crowdsale is Owned {
   }
 
   function withdrow() public {
-    require(withdrowRateMolecular > 0);
-    require(withdrowRateDenominator >= withdrowRateMolecular);
-    uint256 withdrowAmount = coomiAmounts[msg.sender].mul(withdrowRateMolecular)
-                                                     .div(withdrowRateDenominator)
+    require(withdrowRate0 > 0);
+    require(withdrowRate1 >= withdrowRate0);
+    uint256 withdrowAmount = coomiAmounts[msg.sender].mul(withdrowRate0)
+                                                     .div(withdrowRate1)
                                                      .sub(withdrowAmounts[msg.sender]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, msg.sender, withdrowAmount);
@@ -92,10 +92,10 @@ contract Crowdsale is Owned {
   }
 
   function withdrowTo(address _to) public onlyOwner {
-    require(withdrowRateMolecular > 0);
-    require(withdrowRateDenominator >= withdrowRateMolecular);
-    uint256 withdrowAmount = coomiAmounts[_to].mul(withdrowRateMolecular)
-                                              .div(withdrowRateDenominator)
+    require(withdrowRate0 > 0);
+    require(withdrowRate1 >= withdrowRate0);
+    uint256 withdrowAmount = coomiAmounts[_to].mul(withdrowRate0)
+                                              .div(withdrowRate1)
                                               .sub(withdrowAmounts[_to]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, _to, withdrowAmount);
@@ -106,9 +106,9 @@ contract Crowdsale is Owned {
     exchangeRate = _exchangeRate;
   }
 
-  function setWithdrowRate(uint256 _withdrowRateMolecular, uint256 _withdrowRateDenominator) public onlyOwner {
-    require(_withdrowRateDenominator >= _withdrowRateMolecular);
-    withdrowRateMolecular = _withdrowRateMolecular;
-    withdrowRateDenominator = _withdrowRateDenominator;
+  function setWithdrowRate(uint256 _withdrowRate0, uint256 _withdrowRate1) public onlyOwner {
+    require(_withdrowRate1 >= _withdrowRate0);
+    withdrowRate0 = _withdrowRate0;
+    withdrowRate1 = _withdrowRate1;
   }
 }
