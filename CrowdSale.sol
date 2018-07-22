@@ -54,7 +54,8 @@ contract Crowdsale is Owned {
 
   CoomiToken public coomiToken;
   uint256 public exchangeRate;
-  uint256 public withdrowRate;
+  uint256 public withdrowRateMolecular;
+  uint256 public withdrowRateDenominator;
   uint256 public etherAmountsSum;
   uint256 public coomiAmountsSum;
   mapping(address => uint256) public etherAmounts;
@@ -64,7 +65,8 @@ contract Crowdsale is Owned {
   constructor(CoomiToken _coomiToken) public {
     coomiToken = _coomiToken;
     exchangeRate = 0;
-    withdrowRate = 0;
+    withdrowRateMolecular = 0;
+    withdrowRateDenominator = 0;
   }
 
   function () payable public {
@@ -79,16 +81,18 @@ contract Crowdsale is Owned {
   }
 
   function withdrow() public {
-    require(withdrowRate > 0);
-    uint256 withdrowAmount = coomiAmounts[msg.sender].div(withdrowRate).sub(withdrowAmounts[msg.sender]);
+    require(withdrowRateMolecular > 0);
+    require(withdrowRateDenominator >= withdrowRateMolecular);
+    uint256 withdrowAmount = coomiAmounts[msg.sender].mul(withdrowRateMolecular).div(withdrowRateDenominator).sub(withdrowAmounts[msg.sender]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, msg.sender, withdrowAmount);
     withdrowAmounts[msg.sender] = withdrowAmounts[msg.sender].add(withdrowAmount);
   }
 
   function withdrowTo(address _to) public onlyOwner {
-    require(withdrowRate > 0);
-    uint256 withdrowAmount = coomiAmounts[_to].div(withdrowRate).sub(withdrowAmounts[_to]);
+    require(withdrowRateMolecular > 0);
+    require(withdrowRateDenominator >= withdrowRateMolecular);
+    uint256 withdrowAmount = coomiAmounts[_to].mul(withdrowRateMolecular).div(withdrowRateDenominator).sub(withdrowAmounts[_to]);
     require(withdrowAmount > 0);
     coomiToken.transferFrom(owner, _to, withdrowAmount);
     withdrowAmounts[_to] = withdrowAmounts[_to].add(withdrowAmount);
@@ -98,7 +102,10 @@ contract Crowdsale is Owned {
     exchangeRate = _exchangeRate;
   }
 
-  function setWithdrowRate(uint256 _withdrowRate) public onlyOwner {
-    withdrowRate = _withdrowRate;
+  function setWithdrowRate(uint256 _withdrowRateMolecular, uint256 _withdrowRateDenominator) public onlyOwner {
+    require(_withdrowRateMolecular >= 0);
+    require(_withdrowRateDenominator >= _withdrowRateMolecular);
+    withdrowRateMolecular = _withdrowRateMolecular;
+    withdrowRateDenominator = _withdrowRateDenominator;
   }
 }
