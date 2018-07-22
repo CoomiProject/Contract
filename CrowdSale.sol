@@ -54,8 +54,8 @@ contract Crowdsale is Owned {
 
   CoomiToken public coomiToken;
   uint256 public exchangeRate;
-  uint256 public withdrowRate0; // Molecular;
-  uint256 public withdrowRate1; // Denominator;
+  uint256 public withdrowRate0; // Molecular
+  uint256 public withdrowRate1; // Denominator
   uint256 public etherAmountsSum;
   uint256 public coomiAmountsSum;
   mapping(address => uint256) public etherAmounts;
